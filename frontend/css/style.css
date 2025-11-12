@@ -82,18 +82,19 @@ body {
     display: none;
     flex-direction: column;
     justify-content: space-between;
+    /* allow children to use min-height:0 for proper scrolling inside flex */
+    align-self: stretch;
+    min-height: 0;
 }
 
 .chat__messages {
-    flex-grow: 1;
+    flex: 1 1 auto; /* grow to take available space but allow shrinking */
     padding: 30px 30px calc(var(--chat-form-height) + 20px);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     overflow-y: auto; /* messages scroll internally, page doesn't */
-    /* ensure messages area takes viewport height minus header and form so it can scroll */
-    min-height: 0; /* allow flex child to shrink properly */
-    height: calc(100dvh - var(--chat-form-height) - 56px); /* 56px approximates header height */
+    min-height: 0; /* allow flex child to shrink properly and enable scrolling */
 }
 
 .chat__header {
@@ -306,7 +307,8 @@ body {
     border-radius: 6px;
     margin-bottom: 8px;
     display: flex;
-    align-items: flex-start;
+    /* make quoted block stretch so the left colored bar fills the quoted block height */
+    align-items: stretch;
 }
 
 /* quoted background differs depending on owner for better contrast */
@@ -332,16 +334,18 @@ body {
 }
 
 .message--quoted .quoted-text {
-    color: #dcdcdc;
+    color: #858585;
     font-size: 0.85rem;
     opacity: 0.95;
 }
 
 .quoted-bar {
     width: 4px;
-    height: 100%;
+    /* allow bar to stretch to the quoted block height */
+    align-self: stretch;
     border-radius: 2px;
     margin-right: 10px;
+    display: block;
 }
 
 .quoted-body { flex:1 }
