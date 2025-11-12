@@ -155,3 +155,51 @@ body {
     font-weight: 700;
     color: cadetblue;
 }
+
+/* Reply preview shown above input when replying to a message */
+.reply-preview {
+    background: rgba(255,255,255,0.06);
+    border-left: 4px solid rgba(255,255,255,0.12);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #eaeaea;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.reply-preview .reply-author {
+    font-weight: 700;
+    color: #cfe8ff;
+    font-size: 0.85rem;
+}
+
+.reply-preview .reply-text {
+    color: #dcdcdc;
+    font-size: 0.9rem;
+    opacity: 0.95;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Draggable message visual feedback */
+.draggable {
+    touch-action: pan-y;
+    transition: transform 120ms ease-out;
+}
+
+.dragging {
+    transform: translateX(12px);
+}
+
+.dragged-right {
+    transform: translateX(90px);
+}
+
+/* Small reply indicator on message when a reply is present */
+.message--reply {
+    border-left: 3px solid rgba(200,200,200,0.12);
+    padding-left: 8px;
+}
