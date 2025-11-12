@@ -170,12 +170,16 @@ body {
     background: rgba(255,255,255,0.06);
     border-left: 4px solid rgba(255,255,255,0.12);
     padding: 8px 12px;
-    margin-bottom: 8px;
     font-size: 0.9rem;
     color: #eaeaea;
     display: flex;
     gap: 10px;
     align-items: center;
+    position: absolute;
+    bottom: calc(100% + 8px); /* position above the form without resizing layout */
+    left: 16px;
+    right: 76px; /* leave space for send button */
+    z-index: 50;
 }
 
 .reply-preview .reply-author {
@@ -216,7 +220,6 @@ body {
 /* Reply button shown on desktop when hovering a message */
 .reply-btn {
     position: absolute;
-    right: -36px;
     top: 8px;
     width: 30px;
     height: 30px;
@@ -231,6 +234,10 @@ body {
     color: #dcdcdc;
     border: 1px solid rgba(255,255,255,0.03);
 }
+
+/* place reply button on the left for self, right for others */
+.message--self .reply-btn { left: -36px; right: auto; }
+.message--other .reply-btn { right: -36px; left: auto; }
 
 .reply-btn:hover { transform: scale(1.06); }
 
@@ -253,6 +260,13 @@ body {
     padding: 6px 8px;
     border-radius: 6px;
     margin-bottom: 8px;
+}
+
+.reply-meta {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+    font-weight: 600;
 }
 
 .message--quoted .quoted-text {
