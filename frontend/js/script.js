@@ -10,6 +10,12 @@ const chatInput = chat.querySelector('.chat__input')
 const chatMessages = chat.querySelector('.chat__messages')
 const chatHeader = chat.querySelector('.chat__header')
 
+// DEBUG: log the initial structure
+console.log('Chat container:', chat)
+console.log('Messages container:', chatMessages)
+console.log('Form container:', chatForm)
+console.log('Header container:', chatHeader)
+
 // reply preview container (inserted above input)
 let replyState = null // { id, sender, text }
 const replyPreview = document.createElement('div')
@@ -242,6 +248,12 @@ const handleLogin = (event) => {
 
     login.style.display = "none"
     chat.style.display = "flex"
+
+    // Force layout recalc
+    setTimeout(() => {
+        chat.style.height = window.innerHeight + 'px'
+        console.log('Chat height set to:', window.innerHeight)
+    }, 100)
 
     // Choose the right websocket protocol and host for local vs deployed environments
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
