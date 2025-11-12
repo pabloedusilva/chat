@@ -196,43 +196,6 @@ const scrollChatToBottom = () => {
     }
 }
 
-// ensure the messages container has the right height so overflow-y works
-function updateChatLayout() {
-    try {
-        // now that form is part of flex layout, just ensure messages container can overflow
-        chatMessages.style.boxSizing = 'border-box'
-        chatMessages.style.overflowY = 'auto'
-    } catch (e) {
-        // ignore
-    }
-}
-
-// debounce helper
-function debounce(fn, wait = 120) {
-    let t = null
-    return (...args) => {
-        clearTimeout(t)
-        t = setTimeout(() => fn(...args), wait)
-    }
-}
-
-window.addEventListener('resize', debounce(updateChatLayout, 80))
-
-// ensure layout is set on initial load
-document.addEventListener('DOMContentLoaded', () => {
-    try { updateChatLayout() } catch (e) { }
-})
-
-// observe changes in the messages container (new messages) and update layout
-if (window.MutationObserver && chatMessages) {
-    const mo = new MutationObserver(debounce(() => {
-        updateChatLayout()
-        // also ensure we don't lose scroll after new messages
-        scrollChatToBottom()
-    }, 60))
-    mo.observe(chatMessages, { childList: true, subtree: false })
-}
-
 const processMessage = ({ data }) => {
         const parsed = JSON.parse(data)
 
@@ -266,8 +229,7 @@ function renderMessage(parsed) {
         : createMessageOtherElement(content, userName, userColor, reply)
 
     chatMessages.appendChild(messageEl)
-    // after appending a message, ensure layout is correct and scroll the messages container to the bottom
-    updateChatLayout()
+    // after appending a message, scroll the messages container to the bottom
     scrollChatToBottom()
 }
 
@@ -280,9 +242,6 @@ const handleLogin = (event) => {
 
     login.style.display = "none"
     chat.style.display = "flex"
-
-    // layout depends on header/form sizes — set heights so messages can scroll
-    updateChatLayout()
 
     // Choose the right websocket protocol and host for local vs deployed environments
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
