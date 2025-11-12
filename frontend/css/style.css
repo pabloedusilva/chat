@@ -12,6 +12,10 @@
     --chat-form-height: 64px;
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     background: url("../images/background.png");
     color: #f2f2f2;
@@ -19,7 +23,7 @@ body {
 
 .container {
     width: 100%;
-    height: 100dvh;
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,7 +82,7 @@ body {
 
 .chat {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     display: none;
     flex-direction: column;
     justify-content: space-between;
@@ -94,6 +98,7 @@ body {
     flex-direction: column;
     justify-content: flex-end;
     overflow-y: auto; /* messages scroll internally, page doesn't */
+    -webkit-overflow-scrolling: touch;
     min-height: 0; /* allow flex child to shrink properly and enable scrolling */
 }
 
