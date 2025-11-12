@@ -66,15 +66,18 @@ const displayedLocalIds = new Set()
 
 const createMessageSelfElement = (content, reply) => {
         const div = document.createElement('div')
-
         div.classList.add('message--self')
+        // mark dataset so reply button can pick up color/name
+        div.dataset.userId = user.id || ''
+        div.dataset.userName = user.name || ''
+        div.dataset.userColor = user.color || ''
         if (reply) div.classList.add('message--reply')
-
         if (reply) {
             const q = document.createElement('div')
             q.className = 'message--quoted'
-            const replierLabel = 'Você'
-            q.innerHTML = `<div class="reply-meta">${escapeHtml(replierLabel)} → ${escapeHtml(reply.sender)}</div><div class="quoted-text">${escapeHtml(reply.text)}</div>`
+            // left color bar using reply.senderColor when available
+            const barColor = reply.senderColor || reply.color || '#7aa7ff'
+            q.innerHTML = `<div class="quoted-bar" style="background:${escapeHtml(barColor)}"></div><div class="quoted-body"><div class="reply-meta">${escapeHtml('Você')} → ${escapeHtml(reply.sender)}</div><div class="quoted-text">${escapeHtml(reply.text)}</div></div>`
             div.appendChild(q)
         }
 
@@ -92,13 +95,16 @@ const createMessageSelfElement = (content, reply) => {
 const createMessageOtherElement = (content, sender, senderColor, reply) => {
         const div = document.createElement('div')
         div.classList.add('message--other')
+        // set dataset for other user info
+        div.dataset.userName = sender || ''
+        div.dataset.userColor = senderColor || ''
         if (reply) div.classList.add('message--reply')
-
         if (reply) {
             const q = document.createElement('div')
             q.className = 'message--quoted'
-            const replierLabel = escapeHtml(sender)
-            q.innerHTML = `<div class="reply-meta">${replierLabel} → ${escapeHtml(reply.sender)}</div><div class="quoted-text">${escapeHtml(reply.text)}</div>`
+            // left color bar uses the replied person's color when provided
+            const barColor = reply.senderColor || reply.color || senderColor || '#7aa7ff'
+            q.innerHTML = `<div class="quoted-bar" style="background:${escapeHtml(barColor)}"></div><div class="quoted-body"><div class="reply-meta">${escapeHtml(sender)} → ${escapeHtml(reply.sender)}</div><div class="quoted-text">${escapeHtml(reply.text)}</div></div>`
             div.appendChild(q)
         }
 
@@ -207,7 +213,7 @@ const sendMessage = (event) => {
         userName: user.name,
         userColor: user.color,
         content: chatInput.value,
-        replyTo: replyState ? { id: replyState.id, sender: replyState.sender, text: replyState.text } : null,
+        replyTo: replyState ? { id: replyState.id, sender: replyState.sender, text: replyState.text, senderColor: replyState.color || null } : null,
         localId
     }
 
@@ -227,6 +233,8 @@ chatForm.addEventListener('submit', sendMessage)
 
 // ---------------------- drag to reply implementation ----------------------
 function makeMessageDraggable(el) {
+    // disable drag-to-reply on larger screens (desktop) — only use button there
+    if (window.matchMedia && window.matchMedia('(min-width: 768px)').matches) return
     el.classList.add('draggable')
 
     let startX = 0
@@ -296,7 +304,9 @@ function addReplyButton(el) {
         const bodyEl = el.querySelector('.message--body')
         const sender = senderEl ? senderEl.textContent : (user.name || 'Você')
         const text = bodyEl ? bodyEl.textContent : el.textContent
-        setReplyPreview({ id: Date.now().toString(), sender, text, node: el })
+        // grab color from dataset if available
+        const color = el.dataset.userColor || (senderEl ? senderEl.style.color : '')
+        setReplyPreview({ id: Date.now().toString(), sender, text, node: el, color })
         // focus the input so user can type reply immediately
         chatInput.focus()
     })
