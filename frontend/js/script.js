@@ -14,22 +14,39 @@ let replyState = null // { id, sender, text }
 const replyPreview = document.createElement('div')
 replyPreview.className = 'reply-preview'
 replyPreview.style.display = 'none'
-replyPreview.innerHTML = `<div class="reply-author"></div><div class="reply-text"></div>`
+replyPreview.innerHTML = `<div class="reply-author"></div><div class="reply-text"></div><button class="reply-close" title="Cancelar resposta">×</button>`
 chatForm.insertBefore(replyPreview, chatForm.firstChild)
+// ensure absolute preview positions relative to the form
+chatForm.style.position = chatForm.style.position || 'relative'
 
+let highlightedNode = null
 const setReplyPreview = (reply) => {
+    // remove existing highlight
+    if (highlightedNode) highlightedNode.classList.remove('replying')
+
     replyState = reply
     if (!reply) {
         replyPreview.style.display = 'none'
+        highlightedNode = null
         return
     }
-    replyPreview.querySelector('.reply-author').textContent = reply.sender
+
+    // highlight original message node if supplied
+    if (reply.node && reply.node.classList) {
+        reply.node.classList.add('replying')
+        highlightedNode = reply.node
+    }
+
+    const replier = (user.name && reply.node && reply.node.classList.contains('message--self')) ? 'Você' : (user.name || 'Você')
+    const repliedTo = reply.sender
+    replyPreview.querySelector('.reply-author').textContent = `${replier} respondendo a ${repliedTo}`
     replyPreview.querySelector('.reply-text').textContent = reply.text
     replyPreview.style.display = 'flex'
 }
 
 // allow cancelling reply by clicking preview
-replyPreview.addEventListener('click', () => setReplyPreview(null))
+// close button inside preview cancels reply without closing the entire preview area via other clicks
+replyPreview.querySelector('.reply-close').addEventListener('click', (e) => { e.stopPropagation(); setReplyPreview(null) })
 
 const colors = [
     "cadetblue",
@@ -56,7 +73,8 @@ const createMessageSelfElement = (content, reply) => {
         if (reply) {
             const q = document.createElement('div')
             q.className = 'message--quoted'
-            q.innerHTML = `<span class="message--sender">${escapeHtml(reply.sender)}</span><div class="quoted-text">${escapeHtml(reply.text)}</div>`
+            const replierLabel = 'Você'
+            q.innerHTML = `<div class="reply-meta">${escapeHtml(replierLabel)} → ${escapeHtml(reply.sender)}</div><div class="quoted-text">${escapeHtml(reply.text)}</div>`
             div.appendChild(q)
         }
 
@@ -79,7 +97,8 @@ const createMessageOtherElement = (content, sender, senderColor, reply) => {
         if (reply) {
             const q = document.createElement('div')
             q.className = 'message--quoted'
-            q.innerHTML = `<span class="message--sender">${escapeHtml(reply.sender)}</span><div class="quoted-text">${escapeHtml(reply.text)}</div>`
+            const replierLabel = escapeHtml(sender)
+            q.innerHTML = `<div class="reply-meta">${replierLabel} → ${escapeHtml(reply.sender)}</div><div class="quoted-text">${escapeHtml(reply.text)}</div>`
             div.appendChild(q)
         }
 
@@ -279,14 +298,15 @@ function addReplyButton(el) {
     const btn = document.createElement('button')
     btn.className = 'reply-btn'
     btn.title = 'Responder'
-    btn.innerHTML = '&#8614;' // a small arrow symbol (↴)
+    // nicer reply-arrow SVG (left-curving reply arrow) which looks better on desktop
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
     btn.addEventListener('click', (e) => {
         e.stopPropagation()
         const senderEl = el.querySelector('.message--sender')
         const bodyEl = el.querySelector('.message--body')
         const sender = senderEl ? senderEl.textContent : (user.name || 'Você')
         const text = bodyEl ? bodyEl.textContent : el.textContent
-        setReplyPreview({ id: Date.now().toString(), sender, text })
+        setReplyPreview({ id: Date.now().toString(), sender, text, node: el })
         // focus the input so user can type reply immediately
         chatInput.focus()
     })
