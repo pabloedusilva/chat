@@ -61,8 +61,8 @@ const user = { id: "", name: "", color: "" }
 
 let websocket
 const CONNECTED_COUNT_ID = 'connected-count'
-const STORAGE_KEY = 'chat_messages_v1'
-const MAX_STORED = 200
+// track localIds to avoid duplicate echo when server broadcasts back the same message
+const displayedLocalIds = new Set()
 
 const createMessageSelfElement = (content, reply) => {
         const div = document.createElement('div')
@@ -148,22 +148,34 @@ const processMessage = ({ data }) => {
         // handle meta messages like connected count
         if (parsed.type === 'meta' && typeof parsed.connected !== 'undefined') {
             const el = document.getElementById(CONNECTED_COUNT_ID)
-            if (el) el.textContent = `${parsed.connected} online`
+            if (el) {
+                const n = Number(parsed.connected) || 0
+                el.textContent = n === 1 ? '1 pessoa online' : `${n} pessoas online`
+            }
             return
         }
 
-        const { userId, userName, userColor, content, replyTo } = parsed
-        const reply = replyTo ? { id: replyTo.id, sender: replyTo.sender, text: replyTo.text } : null
+        // render a chat message in a single place so reply rendering is consistent
+        renderMessage(parsed)
+}
 
-        const messageEl = userId == user.id
-            ? createMessageSelfElement(content, reply)
-            : createMessageOtherElement(content, userName, userColor, reply)
+// central place to render a message object coming from server
+function renderMessage(parsed) {
+    const { userId, userName, userColor, content, replyTo } = parsed
+    // avoid rendering duplicates when we already showed a local echo
+    if (parsed.localId && displayedLocalIds.has(parsed.localId)) {
+        // already displayed locally; remove from set to allow future messages
+        displayedLocalIds.delete(parsed.localId)
+        return
+    }
+    const reply = replyTo ? { id: replyTo.id, sender: replyTo.sender, text: replyTo.text } : null
 
-        chatMessages.appendChild(messageEl)
-        scrollScreen()
+    const messageEl = userId == user.id
+        ? createMessageSelfElement(content, reply)
+        : createMessageOtherElement(content, userName, userColor, reply)
 
-        // persist message locally
-        saveMessageLocally({ userId, userName, userColor, content, replyTo, ts: Date.now(), localId: Date.now().toString() })
+    chatMessages.appendChild(messageEl)
+    scrollScreen()
 }
 
 const handleLogin = (event) => {
@@ -184,48 +196,26 @@ const handleLogin = (event) => {
     websocket.onmessage = processMessage
 }
 
-function loadStoredMessages() {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
-    try {
-        const arr = JSON.parse(raw)
-        arr.forEach((m) => {
-            const reply = m.replyTo ? { id: m.replyTo.id, sender: m.replyTo.sender, text: m.replyTo.text } : null
-            const el = m.userId == user.id
-                ? createMessageSelfElement(m.content, reply)
-                : createMessageOtherElement(m.content, m.userName, m.userColor, reply)
-            chatMessages.appendChild(el)
-        })
-        scrollScreen()
-    } catch (err) {
-        console.error('Failed to parse stored messages', err)
-    }
-}
-
-function saveMessageLocally(msg) {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY)
-        const arr = raw ? JSON.parse(raw) : []
-        arr.push(msg)
-        // keep cap
-        if (arr.length > MAX_STORED) arr.splice(0, arr.length - MAX_STORED)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
-    } catch (err) {
-        console.error('Failed to save message locally', err)
-    }
-}
+// localStorage persistence removed — chat is real-time only and not saved across reloads
 
 const sendMessage = (event) => {
     event.preventDefault()
 
+    const localId = Date.now().toString()
     const message = {
         userId: user.id,
         userName: user.name,
         userColor: user.color,
         content: chatInput.value,
-        replyTo: replyState ? { id: replyState.id, sender: replyState.sender, text: replyState.text } : null
+        replyTo: replyState ? { id: replyState.id, sender: replyState.sender, text: replyState.text } : null,
+        localId
     }
 
+    // immediate local render so user sees the reply bubble instantly
+    displayedLocalIds.add(localId)
+    renderMessage(message)
+
+    // send to server (server will broadcast back but we'll ignore duplicate via localId)
     websocket.send(JSON.stringify(message))
 
     chatInput.value = ''
