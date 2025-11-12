@@ -96,7 +96,7 @@ body {
 
 .chat__messages {
     flex: 1 1 auto; /* grow to take available space but allow shrinking */
-    padding: 30px 30px calc(var(--chat-form-height) + 20px);
+    padding: 30px 30px 30px 30px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -120,13 +120,11 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    /* form is part of normal flex flow at the bottom */
     height: var(--chat-form-height);
-    z-index: 60;
     overflow: visible; /* allow preview to be visible */
+    flex-shrink: 0; /* prevent form from being squeezed */
+    position: relative; /* for reply preview positioning */
 }
 
 .chat__input {
@@ -199,8 +197,8 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
-    position: fixed; /* fixed so it doesn't affect document flow */
-    bottom: calc(var(--chat-form-height) + 8px);
+    position: absolute; /* position relative to .chat__form */
+    bottom: 100%; /* sit above the form */
     left: 0;
     right: 0;
     padding-left: 16px;
