@@ -14,6 +14,8 @@
 
 html, body {
     height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -25,8 +27,7 @@ body {
     width: 100%;
     height: 100vh;
     display: flex;
-    /* allow children to stretch to full height so .chat can fill viewport */
-    align-items: stretch;
+    align-items: center;
     justify-content: center;
 }
 
@@ -36,7 +37,6 @@ body {
     background-color: #212121;
     border-radius: 5px;
     padding: 20px;
-    /* center the login box when container stretches */
     margin: auto;
 }
 
@@ -83,30 +83,30 @@ body {
     background-color: #fff;
 }
 
+/* ===== CHAT LAYOUT: 3-zone fixed structure like WhatsApp ===== */
 .chat {
     width: 100%;
     height: 100vh;
     display: none;
     flex-direction: column;
-    justify-content: space-between;
-    /* allow children to use min-height:0 for proper scrolling inside flex */
-    align-self: stretch;
-    min-height: 0;
 }
 
+/* Zone 1: Fixed header at top */
+.chat__header {
+    flex-shrink: 0;
+    width: 100%;
+}
+
+/* Zone 2: Scrollable messages in the middle */
 .chat__messages {
-    flex: 1 1 auto; /* grow to take available space but allow shrinking */
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 30px 30px 30px 30px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    overflow-y: auto; /* messages scroll internally, page doesn't */
     -webkit-overflow-scrolling: touch;
-    min-height: 0; /* allow flex child to shrink properly and enable scrolling */
-}
-
-.chat__header {
-    width: 100%;
 }
 
 #connected-count {
@@ -114,17 +114,17 @@ body {
     font-weight: 600;
 }
 
+/* Zone 3: Fixed form at bottom */
 .chat__form {
+    flex-shrink: 0;
     background-color: #191919;
     padding: 15px 20px;
     display: flex;
     align-items: center;
     gap: 10px;
-    /* form is part of normal flex flow at the bottom */
+    width: 100%;
     height: var(--chat-form-height);
-    overflow: visible; /* allow preview to be visible */
-    flex-shrink: 0; /* prevent form from being squeezed */
-    position: relative; /* for reply preview positioning */
+    position: relative;
 }
 
 .chat__input {
@@ -197,13 +197,15 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
-    position: absolute; /* position relative to .chat__form */
-    bottom: 100%; /* sit above the form */
+    position: absolute;
+    bottom: 100%;
     left: 0;
     right: 0;
+    width: 100%;
     padding-left: 16px;
-    padding-right: 96px; /* leave space so it doesn't overlap the send button */
+    padding-right: 96px;
     z-index: 70;
+    box-sizing: border-box;
 }
 
 .reply-preview .preview-bar {
