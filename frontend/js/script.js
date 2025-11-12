@@ -43,6 +43,9 @@ const colors = [
 const user = { id: "", name: "", color: "" }
 
 let websocket
+const CONNECTED_COUNT_ID = 'connected-count'
+const STORAGE_KEY = 'chat_messages_v1'
+const MAX_STORED = 200
 
 const createMessageSelfElement = (content, reply) => {
         const div = document.createElement('div')
@@ -119,21 +122,27 @@ const scrollScreen = () => {
 }
 
 const processMessage = ({ data }) => {
-        const { userId, userName, userColor, content, replyTo } = JSON.parse(data)
+        const parsed = JSON.parse(data)
 
-        const reply = replyTo ? {
-            id: replyTo.id,
-            sender: replyTo.sender,
-            text: replyTo.text
-        } : null
+        // handle meta messages like connected count
+        if (parsed.type === 'meta' && typeof parsed.connected !== 'undefined') {
+            const el = document.getElementById(CONNECTED_COUNT_ID)
+            if (el) el.textContent = `${parsed.connected} online`
+            return
+        }
 
-        const message = userId == user.id
+        const { userId, userName, userColor, content, replyTo } = parsed
+        const reply = replyTo ? { id: replyTo.id, sender: replyTo.sender, text: replyTo.text } : null
+
+        const messageEl = userId == user.id
             ? createMessageSelfElement(content, reply)
             : createMessageOtherElement(content, userName, userColor, reply)
 
-        chatMessages.appendChild(message)
-
+        chatMessages.appendChild(messageEl)
         scrollScreen()
+
+        // persist message locally
+        saveMessageLocally({ userId, userName, userColor, content, replyTo, ts: Date.now(), localId: Date.now().toString() })
 }
 
 const handleLogin = (event) => {
@@ -152,6 +161,37 @@ const handleLogin = (event) => {
     const port = location.port ? `:${location.port}` : ''
     websocket = new WebSocket(`${protocol}://${host}${port}`)
     websocket.onmessage = processMessage
+}
+
+function loadStoredMessages() {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return
+    try {
+        const arr = JSON.parse(raw)
+        arr.forEach((m) => {
+            const reply = m.replyTo ? { id: m.replyTo.id, sender: m.replyTo.sender, text: m.replyTo.text } : null
+            const el = m.userId == user.id
+                ? createMessageSelfElement(m.content, reply)
+                : createMessageOtherElement(m.content, m.userName, m.userColor, reply)
+            chatMessages.appendChild(el)
+        })
+        scrollScreen()
+    } catch (err) {
+        console.error('Failed to parse stored messages', err)
+    }
+}
+
+function saveMessageLocally(msg) {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY)
+        const arr = raw ? JSON.parse(raw) : []
+        arr.push(msg)
+        // keep cap
+        if (arr.length > MAX_STORED) arr.splice(0, arr.length - MAX_STORED)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
+    } catch (err) {
+        console.error('Failed to save message locally', err)
+    }
 }
 
 const sendMessage = (event) => {
