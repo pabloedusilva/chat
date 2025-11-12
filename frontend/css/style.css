@@ -91,6 +91,15 @@ body {
     justify-content: flex-end;
 }
 
+.chat__header {
+    width: 100%;
+}
+
+#connected-count {
+    color: #cfcfcf;
+    font-weight: 600;
+}
+
 .chat__form {
     background-color: #191919;
     padding: 15px 20px;
