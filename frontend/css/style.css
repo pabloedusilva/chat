@@ -145,8 +145,8 @@ body {
 }
 
 .message--self {
-    background-color: #f2f2f2;
-    color: #121212;
+    background-color: #e6e6e6; /* slightly darker for better contrast */
+    color: #0b0b0b;
     border-radius: 10px 10px 0 10px;
     align-self: flex-end;
 }
@@ -167,8 +167,8 @@ body {
 
 /* Reply preview shown above input when replying to a message */
 .reply-preview {
-    background: rgba(255,255,255,0.06);
-    border-left: 4px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.12);
+    border-left: 4px solid rgba(255,255,255,0.20);
     padding: 8px 12px;
     font-size: 0.9rem;
     color: #eaeaea;
@@ -180,6 +180,25 @@ body {
     left: 16px;
     right: 76px; /* leave space for send button */
     z-index: 50;
+}
+
+.reply-preview .reply-close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: #ddd;
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.reply-preview .reply-close:hover {
+    background: rgba(255,255,255,0.03);
 }
 
 .reply-preview .reply-author {
@@ -267,6 +286,17 @@ body {
     color: rgba(255,255,255,0.6);
     margin-bottom: 6px;
     font-weight: 600;
+}
+
+/* highlight the message being replied to */
+.replying {
+        box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.08) inset;
+        transform: translateX(4px);
+}
+
+/* Make sure reply preview gap doesn't force scroll on small viewports */
+@media (max-height: 600px) {
+    .reply-preview { bottom: calc(100% + 4px); }
 }
 
 .message--quoted .quoted-text {
