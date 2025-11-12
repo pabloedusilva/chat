@@ -7,9 +7,14 @@ dotenv.config()
 
 const app = express()
 
-// Basic HTTP routes so a plain browser GET doesn't get a 426 response.
-app.get('/', (req, res) => res.send('WebSocket server running'))
-app.get('/favicon.ico', (req, res) => res.status(204).end())
+// Serve frontend static files so visiting the backend host serves the SPA.
+const path = require('path')
+const frontendPath = path.join(__dirname, '..', '..', 'frontend')
+
+app.use(express.static(frontendPath))
+
+// fallback for index.html (single page app)
+app.get('*', (req, res) => res.sendFile(path.join(frontendPath, 'index.html')))
 
 const server = http.createServer(app)
 
