@@ -8,6 +8,7 @@ const chat = document.querySelector('.chat')
 const chatForm = chat.querySelector('.chat__form')
 const chatInput = chat.querySelector('.chat__input')
 const chatMessages = chat.querySelector('.chat__messages')
+const chatHeader = chat.querySelector('.chat__header')
 
 // reply preview container (inserted above input)
 let replyState = null // { id, sender, text }
@@ -196,6 +197,32 @@ const scrollChatToBottom = () => {
     }
 }
 
+// ensure the messages container has the right height so overflow-y works
+function updateChatLayout() {
+    try {
+        const headerH = chatHeader ? chatHeader.offsetHeight : 0
+        const formH = chatForm ? chatForm.offsetHeight : 0
+        const available = window.innerHeight - headerH - formH
+        if (available > 100) {
+            chatMessages.style.height = available + 'px'
+            chatMessages.style.overflowY = 'auto'
+        }
+    } catch (e) {
+        // ignore
+    }
+}
+
+// debounce helper
+function debounce(fn, wait = 120) {
+    let t = null
+    return (...args) => {
+        clearTimeout(t)
+        t = setTimeout(() => fn(...args), wait)
+    }
+}
+
+window.addEventListener('resize', debounce(updateChatLayout, 80))
+
 const processMessage = ({ data }) => {
         const parsed = JSON.parse(data)
 
@@ -229,7 +256,8 @@ function renderMessage(parsed) {
         : createMessageOtherElement(content, userName, userColor, reply)
 
     chatMessages.appendChild(messageEl)
-    // after appending a message, scroll the messages container to the bottom
+    // after appending a message, ensure layout is correct and scroll the messages container to the bottom
+    updateChatLayout()
     scrollChatToBottom()
 }
 
@@ -242,6 +270,9 @@ const handleLogin = (event) => {
 
     login.style.display = "none"
     chat.style.display = "flex"
+
+    // layout depends on header/form sizes — set heights so messages can scroll
+    updateChatLayout()
 
     // Choose the right websocket protocol and host for local vs deployed environments
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
