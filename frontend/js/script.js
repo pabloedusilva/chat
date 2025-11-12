@@ -204,7 +204,10 @@ function updateChatLayout() {
         const formH = chatForm ? chatForm.offsetHeight : 0
         const available = window.innerHeight - headerH - formH
         if (available > 100) {
+            // explicitly set both height and maxHeight and ensure box-sizing so padding is counted
+            chatMessages.style.boxSizing = 'border-box'
             chatMessages.style.height = available + 'px'
+            chatMessages.style.maxHeight = available + 'px'
             chatMessages.style.overflowY = 'auto'
         }
     } catch (e) {
@@ -222,6 +225,21 @@ function debounce(fn, wait = 120) {
 }
 
 window.addEventListener('resize', debounce(updateChatLayout, 80))
+
+// ensure layout is set on initial load
+document.addEventListener('DOMContentLoaded', () => {
+    try { updateChatLayout() } catch (e) { }
+})
+
+// observe changes in the messages container (new messages) and update layout
+if (window.MutationObserver && chatMessages) {
+    const mo = new MutationObserver(debounce(() => {
+        updateChatLayout()
+        // also ensure we don't lose scroll after new messages
+        scrollChatToBottom()
+    }, 60))
+    mo.observe(chatMessages, { childList: true, subtree: false })
+}
 
 const processMessage = ({ data }) => {
         const parsed = JSON.parse(data)
