@@ -9,6 +9,7 @@
 
 :root {
     font-size: 16px;
+    --chat-form-height: 64px;
 }
 
 body {
@@ -85,10 +86,11 @@ body {
 
 .chat__messages {
     flex-grow: 1;
-    padding: 30px 30px 90px;
+    padding: 30px 30px calc(var(--chat-form-height) + 20px);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    overflow-y: auto; /* messages scroll internally, page doesn't */
 }
 
 .chat__header {
@@ -109,7 +111,10 @@ body {
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
+    right: 0;
+    height: var(--chat-form-height);
+    z-index: 60;
+    overflow: visible; /* allow preview to be visible */
 }
 
 .chat__input {
@@ -136,12 +141,17 @@ body {
 
 .chat__messages > div {
     padding: 10px;
-    width: 100%;
-    max-width: 250px;
-    font-size: 0.9rem;
+    width: auto;
+    max-width: 95%; /* fill almost full width on small screens */
+    font-size: 0.95rem;
     font-weight: 500;
     margin-bottom: 15px;
     line-height: 22px;
+}
+
+/* on larger screens limit bubble width so chat is readable */
+@media (min-width: 768px) {
+    .chat__messages > div { max-width: 70%; }
 }
 
 .message--self {
@@ -149,6 +159,7 @@ body {
     color: #0b0b0b;
     border-radius: 10px 10px 0 10px;
     align-self: flex-end;
+    margin-left: auto; /* push to the right */
 }
 
 .message--other {
@@ -156,6 +167,7 @@ body {
     color: #f2f2f2;
     border-radius: 0 10px 10px 10px;
     align-self: flex-start;
+    margin-right: auto; /* keep on left */
 }
 
 .message--sender {
@@ -175,11 +187,11 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
-    position: absolute;
-    bottom: calc(100% + 8px); /* position above the form without resizing layout */
+    position: fixed; /* fixed so it doesn't affect document flow */
+    bottom: calc(var(--chat-form-height) + 8px);
     left: 16px;
     right: 76px; /* leave space for send button */
-    z-index: 50;
+    z-index: 70;
 }
 
 .reply-preview .reply-close {
