@@ -181,7 +181,7 @@ body {
 .reply-preview {
     background: rgba(255,255,255,0.12);
     border-left: 4px solid rgba(255,255,255,0.20);
-    padding: 8px 12px;
+    padding: 10px 16px;
     font-size: 0.9rem;
     color: #eaeaea;
     display: flex;
@@ -189,8 +189,10 @@ body {
     align-items: center;
     position: fixed; /* fixed so it doesn't affect document flow */
     bottom: calc(var(--chat-form-height) + 8px);
-    left: 16px;
-    right: 76px; /* leave space for send button */
+    left: 0;
+    right: 0;
+    padding-left: 16px;
+    padding-right: 96px; /* leave space so it doesn't overlap the send button */
     z-index: 70;
 }
 
@@ -291,6 +293,8 @@ body {
     padding: 6px 8px;
     border-radius: 6px;
     margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
 }
 
 .reply-meta {
@@ -316,3 +320,14 @@ body {
     font-size: 0.85rem;
     opacity: 0.95;
 }
+
+.quoted-bar {
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
+    margin-right: 10px;
+}
+
+.quoted-body { flex:1 }
+
+.reply-meta { color: rgba(255,255,255,0.8); font-weight:700; font-size:0.78rem; margin-bottom:4px }
