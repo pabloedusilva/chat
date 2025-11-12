@@ -196,6 +196,13 @@ body {
     z-index: 70;
 }
 
+.reply-preview .preview-bar {
+    width: 4px;
+    height: 44px;
+    border-radius: 2px;
+    margin-right: 12px;
+}
+
 .reply-preview .reply-close {
     position: absolute;
     right: 12px;
@@ -272,8 +279,8 @@ body {
 }
 
 /* place reply button on the left for self, right for others */
-.message--self .reply-btn { left: 8px; right: auto; }
-.message--other .reply-btn { right: 8px; left: auto; }
+.message--self .reply-btn { left: -36px; right: auto; }
+.message--other .reply-btn { right: -36px; left: auto; }
 
 .reply-btn:hover { transform: scale(1.06); }
 
