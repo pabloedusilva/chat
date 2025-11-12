@@ -120,6 +120,8 @@ body {
     scrollbar-width: auto;
     -webkit-user-select: text;
     user-select: text;
+    position: relative;
+    z-index: 1;
 }
 
 #connected-count {
