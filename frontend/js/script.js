@@ -186,11 +186,14 @@ const getRandomColor = () => {
     return colors[randomIndex]
 }
 
-const scrollScreen = () => {
-    window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: "smooth"
-    })
+// scroll the chat messages container to the bottom
+const scrollChatToBottom = () => {
+    try {
+        chatMessages.scrollTop = chatMessages.scrollHeight
+    } catch (e) {
+        // fallback to window if something goes wrong
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+    }
 }
 
 const processMessage = ({ data }) => {
@@ -226,7 +229,8 @@ function renderMessage(parsed) {
         : createMessageOtherElement(content, userName, userColor, reply)
 
     chatMessages.appendChild(messageEl)
-    scrollScreen()
+    // after appending a message, scroll the messages container to the bottom
+    scrollChatToBottom()
 }
 
 const handleLogin = (event) => {
@@ -353,6 +357,8 @@ function addReplyButton(el) {
         // grab color from dataset if available
         const color = el.dataset.userColor || (senderEl ? senderEl.style.color : '')
         setReplyPreview({ id: Date.now().toString(), sender, text, node: el, color })
+        // scroll the original message into view so user clearly sees what they're replying to
+        try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }) } catch (e) { /* ignore */ }
         // focus the input so user can type reply immediately
         chatInput.focus()
     })
