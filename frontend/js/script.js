@@ -14,7 +14,8 @@ let replyState = null // { id, sender, text }
 const replyPreview = document.createElement('div')
 replyPreview.className = 'reply-preview'
 replyPreview.style.display = 'none'
-replyPreview.innerHTML = `<div class="reply-author"></div><div class="reply-text"></div><button class="reply-close" title="Cancelar resposta">×</button>`
+// start empty; we'll populate DOM inside setReplyPreview so we can include a colored bar
+replyPreview.innerHTML = ''
 chatForm.insertBefore(replyPreview, chatForm.firstChild)
 // ensure absolute preview positions relative to the form
 chatForm.style.position = chatForm.style.position || 'relative'
@@ -28,6 +29,7 @@ const setReplyPreview = (reply) => {
     if (!reply) {
         replyPreview.style.display = 'none'
         highlightedNode = null
+        replyPreview.innerHTML = ''
         return
     }
 
@@ -37,16 +39,58 @@ const setReplyPreview = (reply) => {
         highlightedNode = reply.node
     }
 
-    const replier = (user.name && reply.node && reply.node.classList.contains('message--self')) ? 'Você' : (user.name || 'Você')
-    const repliedTo = reply.sender
-    replyPreview.querySelector('.reply-author').textContent = `${replier} respondendo a ${repliedTo}`
-    replyPreview.querySelector('.reply-text').textContent = reply.text
+    // build preview with colored bar, meta and close button (delegated listener handles close)
+    const barColor = reply.senderColor || reply.color || (reply.node && reply.node.dataset && reply.node.dataset.userColor) || '#90a4ae'
+
+    replyPreview.innerHTML = ''
     replyPreview.style.display = 'flex'
+
+    const container = document.createElement('div')
+    container.style.display = 'flex'
+    container.style.alignItems = 'center'
+    container.style.gap = '12px'
+    container.style.width = '100%'
+
+    const bar = document.createElement('div')
+    bar.className = 'preview-bar'
+    bar.style.background = barColor
+
+    const meta = document.createElement('div')
+    meta.style.flex = '1'
+
+    const replier = (user.name && reply.node && reply.node.classList && reply.node.classList.contains('message--self')) ? 'Você' : (user.name || 'Você')
+    const repliedTo = reply.sender
+
+    const who = document.createElement('div')
+    who.className = 'reply-author'
+    who.textContent = `${replier} respondendo a ${repliedTo}`
+
+    const text = document.createElement('div')
+    text.className = 'reply-text'
+    text.textContent = reply.text
+
+    const close = document.createElement('button')
+    close.className = 'reply-close'
+    close.title = 'Cancelar resposta'
+    close.innerHTML = '×'
+
+    meta.appendChild(who)
+    meta.appendChild(text)
+
+    container.appendChild(bar)
+    container.appendChild(meta)
+    container.appendChild(close)
+
+    replyPreview.appendChild(container)
 }
 
-// allow cancelling reply by clicking preview
-// close button inside preview cancels reply without closing the entire preview area via other clicks
-replyPreview.querySelector('.reply-close').addEventListener('click', (e) => { e.stopPropagation(); setReplyPreview(null) })
+// delegated listener: allow cancelling reply by clicking any close button inside preview
+replyPreview.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('reply-close')) {
+        e.stopPropagation()
+        setReplyPreview(null)
+    }
+})
 
 const colors = [
     "cadetblue",
@@ -262,14 +306,14 @@ function makeMessageDraggable(el) {
         el.classList.remove('dragging')
         const triggered = currentX > 60 // threshold to accept as reply gesture
         el.style.transform = ''
-        if (triggered) {
+            if (triggered) {
             // find message body and sender
             const senderEl = el.querySelector('.message--sender')
             const bodyEl = el.querySelector('.message--body')
             const sender = senderEl ? senderEl.textContent : (user.name || 'Você')
             const text = bodyEl ? bodyEl.textContent : el.textContent
             // set preview
-            setReplyPreview({ id: Date.now().toString(), sender, text })
+                setReplyPreview({ id: Date.now().toString(), sender, text, node: el, color: el.dataset.userColor || '' })
             // small visual feedback
             el.classList.add('dragged-right')
             setTimeout(() => el.classList.remove('dragged-right'), 250)
