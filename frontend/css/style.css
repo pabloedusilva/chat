@@ -25,7 +25,8 @@ body {
     width: 100%;
     height: 100vh;
     display: flex;
-    align-items: center;
+    /* allow children to stretch to full height so .chat can fill viewport */
+    align-items: stretch;
     justify-content: center;
 }
 
@@ -35,6 +36,8 @@ body {
     background-color: #212121;
     border-radius: 5px;
     padding: 20px;
+    /* center the login box when container stretches */
+    margin: auto;
 }
 
 .login > h2 {
