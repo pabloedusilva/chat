@@ -89,24 +89,32 @@ body {
     height: 100vh;
     display: none;
     flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 /* Zone 1: Fixed header at top */
 .chat__header {
     flex-shrink: 0;
     width: 100%;
+    height: auto;
+    min-height: 56px;
 }
 
 /* Zone 2: Scrollable messages in the middle */
 .chat__messages {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1 1 auto;
+    overflow-y: scroll !important;
     overflow-x: hidden;
     padding: 30px 30px 30px 30px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
 }
 
 #connected-count {
