@@ -215,6 +215,31 @@ function enableScrolling() {
     }
 }
 
+// set explicit height for messages area so overflow works reliably
+function setMessagesHeight() {
+    try {
+        const headerH = chatHeader ? chatHeader.getBoundingClientRect().height : 0
+        const formH = chatForm ? chatForm.getBoundingClientRect().height : 0
+        const available = Math.max(window.innerHeight - headerH - formH, 120)
+        chatMessages.style.height = available + 'px'
+        chatMessages.style.maxHeight = available + 'px'
+        chatMessages.style.boxSizing = 'border-box'
+        // ensure scrolling is enabled
+        enableScrolling()
+    } catch (e) {
+        console.error('setMessagesHeight error', e)
+    }
+}
+
+function debounce(fn, wait = 100) {
+    let t
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait) }
+}
+
+window.addEventListener('resize', debounce(() => {
+    setMessagesHeight()
+}, 120))
+
 const processMessage = ({ data }) => {
         const parsed = JSON.parse(data)
 
@@ -266,6 +291,10 @@ const handleLogin = (event) => {
     setTimeout(() => {
         chat.style.height = window.innerHeight + 'px'
         enableScrolling()
+        // prevent body scrolling so only messages area scrolls
+        try { document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden' } catch (e) {}
+        // set explicit messages height
+        setMessagesHeight()
         console.log('Chat height set to:', window.innerHeight)
     }, 100)
 
