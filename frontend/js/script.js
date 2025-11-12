@@ -72,6 +72,7 @@ const setReplyPreview = (reply) => {
     const close = document.createElement('button')
     close.className = 'reply-close'
     close.title = 'Cancelar resposta'
+    close.type = 'button'
     close.innerHTML = '×'
 
     meta.appendChild(who)
@@ -339,6 +340,7 @@ function makeMessageDraggable(el) {
 function addReplyButton(el) {
     const btn = document.createElement('button')
     btn.className = 'reply-btn'
+    btn.type = 'button'
     btn.title = 'Responder'
     // nicer reply-arrow SVG (left-curving reply arrow) which looks better on desktop
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
