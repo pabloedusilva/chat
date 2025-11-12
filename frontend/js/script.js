@@ -66,6 +66,7 @@ const createMessageSelfElement = (content, reply) => {
         div.appendChild(body)
 
         makeMessageDraggable(div)
+        addReplyButton(div)
 
         return div
 }
@@ -94,6 +95,7 @@ const createMessageOtherElement = (content, sender, senderColor, reply) => {
         div.appendChild(body)
 
         makeMessageDraggable(div)
+        addReplyButton(div)
 
         return div
 }
@@ -270,4 +272,23 @@ function makeMessageDraggable(el) {
         if (e.touches && e.touches.length) onMove(e.touches[0].clientX)
     }, { passive: true })
     window.addEventListener('touchend', onEnd)
+}
+
+// add reply button for desktop users (down-arrow). This complements drag-to-reply for mobile.
+function addReplyButton(el) {
+    const btn = document.createElement('button')
+    btn.className = 'reply-btn'
+    btn.title = 'Responder'
+    btn.innerHTML = '&#8614;' // a small arrow symbol (↴)
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        const senderEl = el.querySelector('.message--sender')
+        const bodyEl = el.querySelector('.message--body')
+        const sender = senderEl ? senderEl.textContent : (user.name || 'Você')
+        const text = bodyEl ? bodyEl.textContent : el.textContent
+        setReplyPreview({ id: Date.now().toString(), sender, text })
+        // focus the input so user can type reply immediately
+        chatInput.focus()
+    })
+    el.appendChild(btn)
 }
