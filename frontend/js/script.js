@@ -192,24 +192,16 @@ const scrollChatToBottom = () => {
     try {
         chatMessages.scrollTop = chatMessages.scrollHeight
     } catch (e) {
-        // fallback to window if something goes wrong
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+        // ignore
     }
 }
 
 // ensure the messages container has the right height so overflow-y works
 function updateChatLayout() {
     try {
-        const headerH = chatHeader ? chatHeader.offsetHeight : 0
-        const formH = chatForm ? chatForm.offsetHeight : 0
-        const available = window.innerHeight - headerH - formH
-        if (available > 100) {
-            // explicitly set both height and maxHeight and ensure box-sizing so padding is counted
-            chatMessages.style.boxSizing = 'border-box'
-            chatMessages.style.height = available + 'px'
-            chatMessages.style.maxHeight = available + 'px'
-            chatMessages.style.overflowY = 'auto'
-        }
+        // now that form is part of flex layout, just ensure messages container can overflow
+        chatMessages.style.boxSizing = 'border-box'
+        chatMessages.style.overflowY = 'auto'
     } catch (e) {
         // ignore
     }
