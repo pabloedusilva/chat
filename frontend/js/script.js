@@ -202,6 +202,19 @@ const scrollChatToBottom = () => {
     }
 }
 
+// Force scrolling to work - remove any pointer-events blocks
+function enableScrolling() {
+    try {
+        chatMessages.style.pointerEvents = 'auto'
+        chatMessages.style.touchAction = 'auto'
+        chatMessages.style.overflow = 'auto'
+        chatMessages.style.overflowY = 'scroll'
+        console.log('Scrolling enabled')
+    } catch (e) {
+        console.error('Error enabling scroll:', e)
+    }
+}
+
 const processMessage = ({ data }) => {
         const parsed = JSON.parse(data)
 
@@ -252,6 +265,7 @@ const handleLogin = (event) => {
     // Force layout recalc
     setTimeout(() => {
         chat.style.height = window.innerHeight + 'px'
+        enableScrolling()
         console.log('Chat height set to:', window.innerHeight)
     }, 100)
 
