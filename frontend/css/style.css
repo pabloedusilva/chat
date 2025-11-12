@@ -31,6 +31,12 @@ body {
     justify-content: center;
 }
 
+/* When chat is shown, override container centering so chat expands fully */
+.chat {
+    align-self: stretch;
+    justify-self: stretch;
+}
+
 .login {
     width: 100%;
     max-width: 330px;
@@ -89,11 +95,6 @@ body {
     height: 100vh;
     display: none;
     flex-direction: column;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
 }
 
 /* Zone 1: Fixed header at top */
@@ -108,13 +109,17 @@ body {
 .chat__messages {
     flex: 1 1 auto;
     overflow-y: scroll !important;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     padding: 30px 30px 30px 30px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
+    height: auto;
+    scrollbar-width: auto;
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 #connected-count {
