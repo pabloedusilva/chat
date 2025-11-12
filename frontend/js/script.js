@@ -83,7 +83,11 @@ const handleLogin = (event) => {
     login.style.display = "none"
     chat.style.display = "flex"
 
-    websocket = new WebSocket("wss://chat-backend-o1hs.onrender.com")
+    // Choose the right websocket protocol and host for local vs deployed environments
+    const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
+    const host = location.hostname
+    const port = location.port ? `:${location.port}` : ''
+    websocket = new WebSocket(`${protocol}://${host}${port}`)
     websocket.onmessage = processMessage
 }
 
