@@ -174,7 +174,7 @@ function renderMessage(parsed) {
         displayedLocalIds.delete(parsed.localId)
         return
     }
-    const reply = replyTo ? { id: replyTo.id, sender: replyTo.sender, text: replyTo.text } : null
+    const reply = replyTo ? { id: replyTo.id, sender: replyTo.sender, text: replyTo.text, senderColor: replyTo.senderColor || replyTo.color || null } : null
 
     const messageEl = userId == user.id
         ? createMessageSelfElement(content, reply)
