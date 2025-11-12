@@ -24,14 +24,27 @@ const wss = new WebSocketServer({ server })
 wss.on('connection', (ws) => {
     ws.on('error', console.error)
 
+    // When a client sends a message, relay it to all clients unchanged.
     ws.on('message', (data) => {
-        // broadcast to all connected clients
         wss.clients.forEach((client) => {
             if (client.readyState === client.OPEN) client.send(data.toString())
         })
     })
 
+    // Broadcast current connected count to all clients
+    const broadcastCount = () => {
+        const payload = JSON.stringify({ type: 'meta', connected: wss.clients.size })
+        wss.clients.forEach((client) => {
+            if (client.readyState === client.OPEN) client.send(payload)
+        })
+    }
+
     console.log('client connected')
+    broadcastCount()
+
+    ws.on('close', () => {
+        broadcastCount()
+    })
 })
 
 const PORT = process.env.PORT || 8080
